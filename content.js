@@ -1,125 +1,101 @@
-// Function to inject buttons next to each tweet
+// Function to inject buttons next to each tweet or article containing multiple tweets
 function addCheckboxesToTweets() {
-  const tweets = document.querySelectorAll('[data-testid="tweetText"]');
+  const articles = document.querySelectorAll('article[data-testid="tweet"]');
 
-  tweets.forEach((tweet) => {
-    // Create a button element for main tweet
-    const button = document.createElement("button");
-    button.className = "checkbox-label";
-    button.style.float = "right";
-    button.style.padding = "10px";
-    button.style.border = "2px solid red";
-    button.style.borderRadius = "5px";
-    button.style.backgroundColor = "white";
-    button.style.color = "red";
-    button.style.fontWeight = "bold";
-    button.style.cursor = "pointer";
-    button.innerText = "Generate AI Powered Reply";
+  articles.forEach((article) => {
+    const tweets = article.querySelectorAll('[data-testid="tweetText"]');
 
-    // Change button appearance when clicked (simulating a checkbox)
-    let isChecked = false;
-    button.addEventListener("click", () => {
-      isChecked = !isChecked; // Toggle the checked state
-      if (isChecked) {
-        button.style.backgroundColor = "red";
-        button.style.color = "white";
-        console.log("Selected tweet:", tweet.innerText);
-        // Store selected tweet in chrome.storage or process it further
-        chrome.storage.sync.get(["selectedTweets"], function (result) {
-          let selectedTweets = result.selectedTweets || [];
-          selectedTweets.push(tweet.innerText);
-          chrome.storage.sync.set({ selectedTweets });
+    // Check if there are multiple tweets in this article (replies)
+    if (tweets.length > 1) {
+      // Create a button for handling multiple replies
+      const multiButton = document.createElement("button");
+      multiButton.className = "multi-reply-button";
+      multiButton.style.float = "right";
+      multiButton.style.padding = "10px";
+      multiButton.style.border = "2px solid green";
+      multiButton.style.borderRadius = "5px";
+      multiButton.style.backgroundColor = "white";
+      multiButton.style.color = "green";
+      multiButton.style.fontWeight = "bold";
+      multiButton.style.cursor = "pointer";
+      multiButton.innerText = "Generate Multiple AI Replies";
+
+      // Add click event to the button to concatenate all replies
+      multiButton.addEventListener("click", () => {
+        let combinedReplies = "";
+        tweets.forEach((tweet, index) => {
+          combinedReplies += `${tweet.innerText}<br>`; // Concatenate replies with <br> for separation
         });
-      } else {
-        button.style.backgroundColor = "white";
-        button.style.color = "red";
-        // Remove unselected tweet
-        chrome.storage.sync.get(["selectedTweets"], function (result) {
-          let selectedTweets = result.selectedTweets || [];
-          selectedTweets = selectedTweets.filter((t) => t !== tweet.innerText);
-          chrome.storage.sync.set({ selectedTweets });
-        });
+        alert("Multiple replies:\n" + combinedReplies); // Display concatenated replies
+      });
+
+      // Insert the button at the top of the article (for multiple replies)
+      if (!article.querySelector(".multi-reply-button")) {
+        article.insertBefore(multiButton, article.firstChild);
       }
-    });
+    } else {
+      // Single tweet handling (the existing logic)
+      tweets.forEach((tweet) => {
+        // Create a button element for the single tweet
+        const singleButton = document.createElement("button");
+        singleButton.className = "checkbox-label";
+        singleButton.style.float = "right";
+        singleButton.style.padding = "10px";
+        singleButton.style.border = "2px solid red";
+        singleButton.style.borderRadius = "5px";
+        singleButton.style.backgroundColor = "white";
+        singleButton.style.color = "red";
+        singleButton.style.fontWeight = "bold";
+        singleButton.style.cursor = "pointer";
+        singleButton.innerText = "Generate AI Powered Reply";
 
-    // Insert the button before the tweet text (only for parent tweets)
-    if (!tweet.parentNode.querySelector(".checkbox-label")) {
-      tweet.parentNode.insertBefore(button, tweet);
-    }
-
-    // Check if the tweet has child tweets (replies)
-    const tweetParent = tweet.closest('[data-testid="tweet"]');
-    if (
-      tweetParent &&
-      tweetParent.querySelectorAll('[data-testid="tweet"]').length > 1
-    ) {
-      // Add a separate button for the child tweets
-      const childTweets = tweetParent.querySelectorAll(
-        '[data-testid="tweetText"]'
-      );
-      childTweets.forEach((childTweet, index) => {
-        // Skip the first tweet as it's the parent
-        if (index === 0) return;
-
-        const replyButton = document.createElement("button");
-        replyButton.className = "checkbox-reply-label";
-        replyButton.style.float = "right";
-        replyButton.style.padding = "10px";
-        replyButton.style.border = "2px solid blue";
-        replyButton.style.borderRadius = "5px";
-        replyButton.style.backgroundColor = "white";
-        replyButton.style.color = "blue";
-        replyButton.style.fontWeight = "bold";
-        replyButton.style.cursor = "pointer";
-        replyButton.innerText = "Generate Reply for Thread";
-
-        let isReplyChecked = false;
-        replyButton.addEventListener("click", () => {
-          isReplyChecked = !isReplyChecked; // Toggle the checked state for child tweet
-          if (isReplyChecked) {
-            replyButton.style.backgroundColor = "blue";
-            replyButton.style.color = "white";
-            console.log("Selected child tweet:", childTweet.innerText);
-            // Store selected child tweet in chrome.storage or process it further
+        // Toggle button appearance when clicked (simulating a checkbox)
+        let isChecked = false;
+        singleButton.addEventListener("click", () => {
+          isChecked = !isChecked; // Toggle the checked state
+          if (isChecked) {
+            singleButton.style.backgroundColor = "red";
+            singleButton.style.color = "white";
+            console.log("Selected tweet:", tweet.innerText);
+            // Store selected tweet in chrome.storage or process it further
             chrome.storage.sync.get(["selectedTweets"], function (result) {
               let selectedTweets = result.selectedTweets || [];
-              selectedTweets.push(childTweet.innerText);
+              selectedTweets.push(tweet.innerText);
               chrome.storage.sync.set({ selectedTweets });
             });
           } else {
-            replyButton.style.backgroundColor = "white";
-            replyButton.style.color = "blue";
-            // Remove unselected child tweet
+            singleButton.style.backgroundColor = "white";
+            singleButton.style.color = "red";
+            // Remove unselected tweet
             chrome.storage.sync.get(["selectedTweets"], function (result) {
               let selectedTweets = result.selectedTweets || [];
               selectedTweets = selectedTweets.filter(
-                (t) => t !== childTweet.innerText
+                (t) => t !== tweet.innerText
               );
               chrome.storage.sync.set({ selectedTweets });
             });
           }
         });
 
-        // Insert the reply button before the child tweet text
-        if (!childTweet.parentNode.querySelector(".checkbox-reply-label")) {
-          childTweet.parentNode.insertBefore(replyButton, childTweet);
+        // Insert the button before the tweet text (for single replies)
+        if (!tweet.parentNode.querySelector(".checkbox-label")) {
+          tweet.parentNode.insertBefore(singleButton, tweet);
         }
       });
     }
   });
 }
 
+// Function to check if the extension is running and adjust the UI
 function checkExtensionStatus() {
   chrome.storage.local.get("isRunningExtensionReplies", function (result) {
     const isRunning = result.isRunningExtensionReplies || false;
 
-    // Alert when the extension is running
+    // Update start/stop button visibility based on the extension status
     if (isRunning) {
-      // alert("AI Reply Generator is running.");
       document.getElementById("start").classList.add("d-none");
       document.getElementById("stop").classList.remove("d-none");
     } else {
-      // alert("AI Reply Generator is not running.");
       document.getElementById("stop").classList.add("d-none");
       document.getElementById("start").classList.remove("d-none");
     }
@@ -128,8 +104,9 @@ function checkExtensionStatus() {
 
 // Run the function to add buttons on page load and when DOM changes
 addCheckboxesToTweets();
-setInterval(addCheckboxesToTweets, 2000); // Keep checking for new tweets in case of infinite scroll
+setInterval(addCheckboxesToTweets, 2000); // Continuously check for new tweets in case of infinite scroll
 checkExtensionStatus();
+
 
 // document onload #startExtension alert
 document.addEventListener("DOMContentLoaded", () => {
