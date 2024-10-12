@@ -298,8 +298,8 @@ document.addEventListener("DOMContentLoaded", () => {
       customStyleInput.placeholder = "Enter custom tone or style";
     } 
     else if (emotion === "default") {
-      // load the defaultCommand in the input field
       const savedCommand = localStorage.getItem("defaultCommand");
+      customStyleInput.setAttribute("disabled", true);
       if (savedCommand) {
         customStyleInput.value = savedCommand;
       } else {

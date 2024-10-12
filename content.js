@@ -134,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     chrome.storage.local.set({ isRunningExtensionReplies: false }, () => {
       alert("AI Reply Generator stopped");
       alert("Please reload the page to see changes");
+      window.location.reload();
     });
   });
 
