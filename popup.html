@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Twitter Reply Generator</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      .reply-box {
+        margin-top: 20px;
+        max-height: 300px;
+        overflow-y: scroll;
+      }
+      body {
+        width: 400px; /* Adjust the width to your preference */
+        padding: 20px;
+      }
+
+      .checkbox-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        z-index: 2; /* Ensures the checkbox is clickable */
+      }
+
+      .checkbox-container input[type="checkbox"] {
+        margin-right: 10px; /* Puts the checkbox on the left */
+        z-index: 3;
+      }
+
+      .clickable-div {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        cursor: pointer;
+        padding: 10px;
+        background-color: #f0f0f0;
+      }
+
+      .checkbox-container label {
+        display: flex;
+        width: 100%;
+      }
+
+      .list-group-item {
+        /* border bold */
+        border: 3px solid #2e2424 !important;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3 class="mb-3">
+      AI Reply Generator
+      <button class="btn btn-sm float-end" id="close">
+        <i class="fa fa-times"></i>
+      </button>
+    </h3>
+
+    <!-- start button here -->
+    <button class="btn btn-primary btn-sm" id="start">
+      <i class="fa fa-play"></i>
+      Start
+    </button>
+    <button class="btn btn-primary btn-sm d-none" id="stop">
+      <i class="fa fa-stop"></i>
+      Stop
+    </button>
+    <!-- settings button  -->
+    <button class="btn btn-primary btn-sm" data-setting="true" id="settings">
+      <i class="fa fa-cog"></i>
+      Settings
+    </button>
+
+    <!-- Section for API Key Input -->
+    <div class="mainpage">
+      <h5 style="margin-top: 5px; font-weight: bold">Select Tone/Style:</h5>
+      <div class="mb-3">
+        <button
+          class="btn btn-sm btn-outline-primary badgeTone badge-btn"
+          data-emotion="funny"
+        >
+          Funny
+        </button>
+        <button
+          class="btn btn-sm btn-outline-secondary badgeTone badge-btn"
+          data-emotion="smart"
+        >
+          Smart
+        </button>
+        <button
+          class="btn btn-sm btn-outline-success badgeTone badge-btn"
+          data-emotion="professional"
+        >
+          Professional
+        </button>
+        <button
+          class="btn btn-sm btn-outline-warning badgeTone badge-btn"
+          data-emotion="custom"
+          id="customDefaultButton"
+        >
+          Custom
+        </button>
+        <button
+          class="btn btn-sm btn-outline-info badgeTone badge-btn"
+          data-emotion="default"
+        >
+          Default
+        </button>
+      </div>
+
+      <!-- Checkbox for requesting AI to generate an image -->
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="includeImage"
+          value=""
+          style="
+            transform: scale(1.5);
+            border-width: 2px;
+            border-color: #2e2424;
+            border-radius: 5px;
+          "
+        />
+        <label
+          class="form-check-label"
+          for="includeImage"
+          style="font-weight: bold"
+        >
+          Include AI-generated image
+        </label>
+      </div>
+
+      <!-- Input field for Custom style -->
+      <div class="mb-3">
+        <input
+          type="text"
+          class="form-control"
+          id="customStyle"
+          placeholder="Enter custom tone or style"
+        />
+      </div>
+
+      <!-- Submit Button for AI generation -->
+      <div class="mt-3">
+        <button class="btn btn-success d-none" id="generateReply">
+          Reply All with AI
+        </button>
+      </div>
+
+      <div class="mt-3">
+        <button class="btn btn-success d-none" id="startExtension">
+          Start
+        </button>
+      </div>
+
+      <!-- Replies Section -->
+      <div class="reply-box">
+        <h5>Selected Tweets:</h5>
+        <ul class="list-group" id="tweetList">
+          <!-- Selected tweets will be added here dynamically -->
+        </ul>
+      </div>
+    </div>
+
+    <div class="settingsPage d-none">
+      <div class="mb-3 mt-3">
+        <label for="apiKey" class="form-label">Model</label>
+        <select class="form-select-sm" id="model">
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+          <option value="gpt-4o-mini" selected>GPT-4o mini</option>
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="gpt-4-turbo">GPT-4 Turbo</option>
+        </select>
+        <button type="button" class="btn btn-sm btn-outline-info" id="defaultModel">
+          <i class="fas fa-undo"></i>
+          <span class="badge badge-secondary" style="color: #2e2424">Default</span>
+        </button>
+        <!-- add prepend icon -->
+        <div class="input-group-prepend">
+          <span class="input-group-text"
+            ><i class="fa fa-key" style="margin-right: 5px"></i>
+            <input
+              type="password"
+              class="form-control"
+              id="apiKey"
+              placeholder="Enter your OpenAI API key"
+              value=""
+            />
+          </span>
+        </div>
+
+        <div class="input-group-prepend">
+          <label for="apiKey" class="form-label">Default Command</label>
+          <span class="input-group-text">
+            <i class="fas fa-universal-access" style="margin-right: 5px"></i>
+            <input
+              type="text"
+              class="form-control"
+              id="defaultCommand"
+              placeholder="Enter default command"
+              value="/ai"
+            />
+            
+          </span>
+        </div>
+
+        <!-- chat gpt model -->
+
+        <button
+          class="btn btn-sm float-end btn-outline-primary mt-2 mb-3"
+          id="saveApiKeyButton" style="width: 100%; color: #2e2424"
+        >
+          Save API Key
+        </button>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+    <script src="content.js"></script>
+  </body>
+</html>

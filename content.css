@@ -1,0 +1,54 @@
+/* Style checkboxes and tweet interaction */
+input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.9); /* Increase size for better visibility */
+}
+
+/* Add this CSS to your stylesheet */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.checkbox-styled {
+    width: 20px;
+    height: 20px;
+    border: 2px solid red;
+    border-radius: 3px;
+    position: relative;
+    margin-right: 10px;
+    z-index: 999999;
+}
+
+.checkbox-styled.checked {
+    background-color: red;
+}
+
+.checkbox-styled.checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.textAiPowered{
+    font-size: 12px;
+    color: gray;
+    font-style: italic;
+}
+
+/* hoverable textAiPowered*/ 
+.textAiPowered:hover{
+    color: brown;
+}
+
+
+
+
