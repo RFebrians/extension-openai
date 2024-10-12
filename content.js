@@ -23,10 +23,18 @@ function addCheckboxesToTweets() {
       // Add click event to the button to concatenate all replies
       multiButton.addEventListener("click", () => {
         let combinedReplies = "";
-        tweets.forEach((tweet, index) => {
-          combinedReplies += `${tweet.innerText}<br>`; // Concatenate replies with <br> for separation
+        tweets.forEach((tweet) => {
+          // concate it with a new line
+          combinedReplies += `${tweet.innerText}\n\n`;
         });
-        alert("Multiple replies:\n" + combinedReplies); // Display concatenated replies
+        console.log("Multiple replies:", combinedReplies);
+
+        // Store multiple selected tweets in chrome.storage.sync
+        chrome.storage.sync.get(["selectedTweets"], function (result) {
+          let selectedTweets = result.selectedTweets || [];
+          selectedTweets.push(combinedReplies);
+          chrome.storage.sync.set({ selectedTweets });
+        });
       });
 
       // Insert the button at the top of the article (for multiple replies)
@@ -49,7 +57,7 @@ function addCheckboxesToTweets() {
         singleButton.style.cursor = "pointer";
         singleButton.innerText = "Generate AI Powered Reply";
 
-        // Toggle button appearance when clicked (simulating a checkbox)
+        // Toggle button appearance when clicked
         let isChecked = false;
         singleButton.addEventListener("click", () => {
           isChecked = !isChecked; // Toggle the checked state
@@ -57,7 +65,8 @@ function addCheckboxesToTweets() {
             singleButton.style.backgroundColor = "red";
             singleButton.style.color = "white";
             console.log("Selected tweet:", tweet.innerText);
-            // Store selected tweet in chrome.storage or process it further
+
+            // Store selected tweet in chrome.storage.sync
             chrome.storage.sync.get(["selectedTweets"], function (result) {
               let selectedTweets = result.selectedTweets || [];
               selectedTweets.push(tweet.innerText);
@@ -66,12 +75,11 @@ function addCheckboxesToTweets() {
           } else {
             singleButton.style.backgroundColor = "white";
             singleButton.style.color = "red";
+
             // Remove unselected tweet
             chrome.storage.sync.get(["selectedTweets"], function (result) {
               let selectedTweets = result.selectedTweets || [];
-              selectedTweets = selectedTweets.filter(
-                (t) => t !== tweet.innerText
-              );
+              selectedTweets = selectedTweets.filter((t) => t !== tweet.innerText);
               chrome.storage.sync.set({ selectedTweets });
             });
           }
@@ -104,9 +112,8 @@ function checkExtensionStatus() {
 
 // Run the function to add buttons on page load and when DOM changes
 addCheckboxesToTweets();
-setInterval(addCheckboxesToTweets, 2000); // Continuously check for new tweets in case of infinite scroll
+setInterval(addCheckboxesToTweets, 2000); // Keep checking for new tweets in case of infinite scroll
 checkExtensionStatus();
-
 
 // document onload #startExtension alert
 document.addEventListener("DOMContentLoaded", () => {
